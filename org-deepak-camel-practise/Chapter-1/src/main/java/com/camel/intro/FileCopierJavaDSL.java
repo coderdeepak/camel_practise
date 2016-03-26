@@ -3,13 +3,11 @@ package com.camel.intro;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
-
 /***
  * 
  * @author Deepak
  *
  */
-
 public class FileCopierJavaDSL {
 	
 	public static void main(String[] args)  {
@@ -32,25 +30,17 @@ public class FileCopierJavaDSL {
 				 *  
 				 */
 				from("file:data/inbox?noop=true").to("file:data/outbox");
-				
 			}
 		};
 		try{
 			context.addRoutes(rb);
-			
 		    // start the route and let it do its work
 		    context.start();
 		    Thread.sleep(10000);
-
 		    // stop the CamelContext
 		    context.stop();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-
 	}
-	
-	
-	
-
 }
