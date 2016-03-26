@@ -1,0 +1,10 @@
+package com.camel.intro;
+
+public class FileCopier {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}
