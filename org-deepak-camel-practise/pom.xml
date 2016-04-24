@@ -394,5 +394,6 @@
 
 	<modules>
 		<module>Chapter-1</module>
+		<module>Chapter-2</module>
 	</modules>
 </project>
