@@ -6,11 +6,88 @@
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        ">
+       
+       <bean id = "authenticationProcessor" class = "com.camel.customprocessor.AuthenticationProcessor"/>
+       
 	<camelContext xmlns="http://camel.apache.org/schema/spring">
 		<route>
 			<from uri="servlet:///hello" />
 			<log message="Message Received at servlet component" />
 		</route>
+		
+		<!-- Example of setHeader processor -->
+		<route>
+			<from uri="servlet:///setHeader" />
+			<log message="in.body ${in.body}" />
+			<log message="in.body ${body}" />
+			
+			<log message="value of header anyname before setting is ${in.header.anyName}" />
+			<setHeader headerName = "anyName">
+				<constant> This is the value </constant>
+			</setHeader>
+			<log message="value of header anyname after setting is ${in.header.anyName}" />
+		</route>
+		
+		<!-- Example of choice processor -->
+		<route>
+			<from uri="servlet:///choice" />
+			<setHeader headerName = "myFavSuperHero">
+				<constant>Iron Man</constant>
+			</setHeader>
+			<choice>
+				<when>
+					<simple>${in.header.myFavSuperHero} == 'Iron Man'</simple>
+					<log message="My Favourite SuperHero is Iron Man" />		
+				</when>
+				<when>
+					<simple>${in.header.myFavSuperHero} == 'Captain America'</simple>
+					<log message="My Favourite SuperHero is Captan America" />		
+				</when>
+				<otherwise>
+					<log message="My Favourite SuperHero neither Iron man nor Captain America" />
+				</otherwise>
+			</choice>
+		</route>
+		
+		<!-- Example of filter processor -->
+		<route>
+			<from uri="servlet:///filer" />
+			<setHeader headerName = "uLikeMarvel">
+				<constant>Y</constant>
+			</setHeader>
+			<filter>
+				<simple>${in.header.uLikeMarvel} == 'Y'</simple>
+				<log message = "Go and watch Avengers"/>
+			</filter>				
+		</route>
+		
+		<!-- Example of Custom Processor -->
+		
+		<route>
+			<from uri="servlet:///customprocessor" />
+			<process ref = "authenticationProcessor"/>
+			<log message = " value of header name set in Authentication processor is ${in.header.name}"/>
+		</route>
+		
+		<!-- Example of transform Processor -->
+		<route>
+			<from uri="servlet:///transform" />
+			<setHeader headerName = "myFavSuperHero">
+				<constant>Iron Man</constant>
+			</setHeader>	
+			<transform>
+      			<simple>My favourite super hero is ${in.header.myFavSuperHero}</simple>
+    		</transform>
+		</route>
+	<!-- example of vm route -->		
+		<route>
+			<from uri="vm:test" />
+			<log message = "This is a test vm route"/>
+			<transform>
+				<simple>Love u too honey</simple>
+			</transform>
+		</route>
+		
+		
 	</camelContext>
-
 </beans>
