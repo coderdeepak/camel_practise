@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+      ">
+      <bean id="authenticationProcessor" class="com.camel.customprocessor.AuthenticationProcessor" />
+	<bean id="fieldValidationProcessor" class="com.camel.customprocessor.FieldValidationProcessor" />
+	<bean id="businessValidationProcessor" class="com.camel.customprocessor.BusinessValidationProcessor" />
+	<bean id="randomProcessor" class="com.camel.customprocessor.RandomProcessor" />
+      
+      <!-- <import resource = "servlet-component-xml-dsl.xml"/>
+      <import resource = "onexception-to-all-routes.xml"/> -->
+      <import resource = "onexception-use-orginal-message.xml"/>
+
+</beans>

@@ -7,7 +7,9 @@
         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        ">
 
-	
+	<bean id="authenticationProcessor" class="com.camel.customprocessor.AuthenticationProcessor" />
+	<bean id="fieldValidationProcessor" class="com.camel.customprocessor.FieldValidationProcessor" />
+	<bean id="businessValidationProcessor" class="com.camel.customprocessor.BusinessValidationProcessor" />
 
 	<camelContext xmlns="http://camel.apache.org/schema/spring">
 		<route>
@@ -89,7 +91,47 @@
 			</transform>
 		</route>
 
-		
+		<!-- example of onException -->
+		<route>
+			<from uri="servlet:///onException" />
+			<onException>
+				<exception>com.camel.exception.FieldValidationException</exception>
+				<!-- <to uri = "direct:fieldValidationExceptionRoute"/> -->
+				<!-- <handled>
+					<constant>true</constant>
+				</handled> -->
+				<to uri = "direct:fieldValidationExceptionRoute"/>
+			</onException>
+			<onException>
+				<exception>com.camel.exception.BusinessValidationException</exception>
+				<to uri="direct:businessValidationExceptionRoute" />
+			</onException>
+			<process ref="fieldValidationProcessor" />
+			<process ref="businessValidationProcessor" />
+			<log message="Request is being processed" />
+			<transform>
+				<simple>Request processed successfully</simple>
+			</transform>
+		</route>
+
+		<route>
+			<from uri="direct:fieldValidationExceptionRoute" />
+			<log message="This is the route of field validation" />
+			<log message="create response of field validation" />
+			<setBody>
+				<simple>Invalid request; Field Validation</simple>
+			</setBody>
+		</route>
+
+		<route>
+			<from uri="direct:businessValidationExceptionRoute" />
+			<log message="This is the route of business validation" />
+			<log message="Please create log this request in database" />
+			<log message="create response of business validation" />
+			<setBody>
+				<simple>Invalid request ; business validation failed</simple>
+			</setBody>
+		</route>
 
 	</camelContext>
 </beans>

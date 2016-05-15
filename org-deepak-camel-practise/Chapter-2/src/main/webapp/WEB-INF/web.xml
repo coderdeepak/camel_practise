@@ -8,7 +8,7 @@
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:servlet-component-xml-dsl.xml</param-value>
+		<param-value>classpath:chapter-2-camel-config-dsl.xml</param-value>
 	</context-param>
 	
 	

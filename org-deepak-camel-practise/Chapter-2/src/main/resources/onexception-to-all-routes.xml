@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	
+	
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<!-- Message will be moved to inExchangeProcessor ; whenever an exception of type java.lang.Exception is thrown from any of the route -->
+		
+		<!-- 
+			By default, when an exception is raised in the middle of a route, processing of the current exchange is interrupted 
+			and the thrown exception is propagated back to the consumer endpoint at the start of the route. 
+			
+			When an onException clause is triggered, the behavior is essentially the same, except that the onException clause performs some processing before the 
+			thrown exception is propagated back.
+		 -->		
+		
+		<onException>
+				<exception>java.lang.Exception</exception>
+				<!-- 
+					As menioned onException processor by default prapogate exeption back to the client;
+					option of suppressing the rethrown exception after the onException clause has completed. In other words, in this case the exception does not propagate back to the consumer endpoint at the start of the route. 
+				 -->
+				<!-- <handled>
+					<constant>true</constant>
+				</handled> -->
+				<to uri = "direct:exceptionroute"/>
+			</onException>
+				
+				
+		<route>
+			<from uri="servlet:///onException/allroutes1" />
+			<process ref="authenticationProcessor" />
+			<!-- this processor is going to throw exception ; in  case of exception message will be passed to onexchange route -->			
+			<process ref="randomProcessor" />
+			<!-- message will pass to below log processor only if there is no exception  -->
+			<log message="Request is being processed" />
+			<transform>
+				<simple>Request processed successfully</simple>
+			</transform>
+		</route>
+
+		<route>
+			<from uri="direct:exceptionroute" />
+			<log message="Exception in processing request" />
+			<log message="log the request in dump log" />
+			<!--  -->
+			<!-- <handled>
+					<constant>true</constant>
+			</handled>
+ -->			<setBody>
+				<simple>Sorry couldn't process youe request</simple>
+			</setBody>
+		</route>
+
+		
+		<route>
+			<from uri="servlet:///onException/allroutes2" />
+			<log message = "This is some other api to understand that message will be passed to onExchange processor if any exception is thrown in any of the route"/>
+			<log message = "For the sake of simplicity we have kept logic simillar to 'onExchange/allroutes1' "/>
+			<process ref="authenticationProcessor" />
+			<!-- this processor is going to throw exception ; in  case of exception message will be passed to onexchange route -->			
+			<process ref="randomProcessor" />
+			<!-- message will pass to below log processor only if there is no exception  -->
+			<log message="Request is being processed" />
+			<transform>
+				<simple>Request processed successfully</simple>
+			</transform>
+		</route>
+		
+
+	</camelContext>
+</beans>
