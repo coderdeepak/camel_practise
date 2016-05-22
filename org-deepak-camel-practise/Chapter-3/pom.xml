@@ -8,9 +8,7 @@
 		<artifactId>org-deepak-camel-practise</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<groupId>org.deepakkeswani.camel.practise</groupId>
 	<artifactId>Chapter-3</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>Chapter-3 Maven Webapp</name>
 	<url>http://maven.apache.org</url>

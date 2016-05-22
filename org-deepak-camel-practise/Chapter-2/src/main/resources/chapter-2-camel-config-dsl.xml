@@ -13,6 +13,10 @@
       
       <!-- <import resource = "servlet-component-xml-dsl.xml"/>
       <import resource = "onexception-to-all-routes.xml"/> -->
-      <import resource = "onexception-use-orginal-message.xml"/>
+      <!-- <import resource = "onexception-use-orginal-message.xml"/> -->
+      <import resource = "bean-integration\bean-integration-xml-dsl.xml"/>
+      <import resource = "property-place-holder\property-place-holder.xml"/>
+      
+      
 
 </beans>

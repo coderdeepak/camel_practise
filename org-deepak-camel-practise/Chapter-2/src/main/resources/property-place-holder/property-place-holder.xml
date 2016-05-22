@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<!-- read a property from property file -->
+		
+		<propertyPlaceholder id = "properties" location = "property-place-holder/test.property,property-place-holder/salary.property,"/>
+		<!-- <propertyPlaceholder id = "salaryproperties" location = "property-place-holder/salary.property"/> -->
+		
+		<route>
+			<from uri="servlet:///propertyplaceholder" />
+			<log message="My first name is ${properties:firstName} and last name is ${properties:lastName} and my salary is ${properties:deepak}" />
+			<setBody>
+				<simple>My first name is ${properties:firstName} and last name is ${properties:lastName} and my salary is ${properties:deepak}</simple>
+			</setBody>
+		</route>
+
+		
+	</camelContext>
+</beans>

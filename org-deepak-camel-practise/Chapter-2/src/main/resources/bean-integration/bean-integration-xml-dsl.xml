@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	<bean id = "myBeanId" class = "com.camel.beanintegration.MyBean"/>
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+	<!-- A simple bean integration where exchange is mapped to java bean parameter -->
+		<route>
+			<from uri="servlet:///bean-integration/simple" />
+			<log message="Message Received at servlet component" />
+			<setHeader headerName = "anyName">
+				<simple>anyValue</simple>
+			</setHeader>
+			<bean ref="myBeanId" method="processExchange"/>
+			<log message = "body in exchange is ${in.body}"/>
+		</route>
+		
+		<!-- A simple bean integration where exchange body is mapped to java bean parameter -->
+		<route>
+			<from uri="servlet:///bean-integration/exchangebody" />
+			<setBody>
+				<simple>This is current body</simple>
+			</setBody>
+			<bean ref="myBeanId" method="processExchangeBody(${body})"/>
+			<log message = "body in exchange is ${in.body}"/>
+		</route>
+		
+		<!-- A simple bean integration where exchange body is mapped to java bean parameter -->
+		<route>
+			<from uri="servlet:///bean-integration/annotationbinding" />
+			<setBody>
+				<simple>This is current body</simple>
+			</setBody>
+			<setHeader headerName = "user">
+				<simple>Deepak</simple>
+			</setHeader>
+			<bean ref="myBeanId" method="processExchangeUsingAnnotations"/>
+			<log message = "body in exchange is ${in.body}"/>
+		</route>
+
+		
+		
+
+	</camelContext>
+</beans>
