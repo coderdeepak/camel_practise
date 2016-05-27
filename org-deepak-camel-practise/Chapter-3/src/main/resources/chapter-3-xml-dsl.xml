@@ -6,95 +6,10 @@
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        ">
-       
-       <bean id = "authenticationProcessor" class = "com.camel.processor.AuthenticationProcessor"/>
-       <bean id = "authorizationProcessor" class = "com.camel.processor.AuthorizationProcessor"/>
-       <bean id = "duplicateRequestTrackerProcessor" class = "com.camel.processor.DuplicateRequesttrackingProcessor"/>
+    
+     <import resource = "active-mq\activemq-basic.xml"/>   
        
        
        
-	<camelContext xmlns="http://camel.apache.org/schema/spring">
-	<!-- Example to explain direct component -->
-		<route>
-			<from uri="servlet:///direct/auth" />
-			<log message="This is the request at Auth API" />
-			<to uri = "direct:verification"/>
-				<transform>
-      			<simple>This is the response</simple>
-    		</transform>
-    		<log message = "log response of Auth API ${body}"/>
-		</route>
-		
-		<!-- example of direct route -->
-		<route>
-			<from uri="direct:verification" />
-			<log message="This is the request at direct API" />
-			<process ref = "authenticationProcessor"/>
-			<process ref = "authorizationProcessor"/>
-			<process ref = "duplicateRequestTrackerProcessor"/>
-		</route>
-		
-		<!-- example to explain direct route -->
-		
-		<route>
-			<from uri="servlet:///direct/capt" />
-			<log message="This is the request at capture API" />
-			<to uri = "direct:verification"/>
-				<transform>
-      			<simple>This is the response</simple>
-    		</transform>
-    		<log message = "log response of Auth API ${body}"/>
-		</route>
-		<!-- example of seda component -->
-		<route>
-			<from uri="servlet:///seda/auth" />
-			<log message="This is the request at Auth API" />
-			<to uri = "direct:verification"/>
-				<transform>
-      			<simple>This is the response</simple>
-    		</transform>
-    		<log message = "b4 routing to seda:merchantPushUrl API ${date:now:dd-MM-yyyy}"/>
-    		<to uri = "seda:merchantPushUrl?waitForTaskToComplete=Never"/>
-    		<log message = "log response of seda: Auth API ${date:now:dd-MM-yyyy}"/>
-		</route>
-		
-		<route>
-			<from uri = "seda:merchantPushUrl"/>
-			<log message = "sending message to merchant's push url ${date:now:dd-MM-yyyy}"/>
-			<delay>
-            	<constant>10000</constant>
-        	</delay>
-			<log message = "response received merchant's push url at ${date:now:dd-MM-yyyy}"/>
-			<log message = "update database"/>
-		</route>
-		
-		<route>
-			<from uri = "servlet:///vm/auth"/>
-			<log message = "request received at vm"/>
-			<transform>
-				<simple>Love u VM</simple>
-			</transform>
-			<to uri = "vm:test"/>
-		</route>
-		
-		<route>
-			<from uri = "servlet:///testenum"/>
-			<log message = "${type:com.Fruits.Apple} is java.lang.String"/>
-			<filter>
-				<simple>${type:com.Fruits.Apple}.getPrize() == 200</simple>
-				<log message = "It is Apple"/>	
-			</filter>
-			
-			<filter>
-				<simple>${type:com.Fruits.Apple} is  'java.lang.String'</simple>
-				<log message = "Apple is String"/>	
-			</filter>
-			
-			<transform>
-				<simple>Love u VM</simple>
-			</transform>
-			
-		</route>
-		
-	</camelContext>
+    
 </beans>

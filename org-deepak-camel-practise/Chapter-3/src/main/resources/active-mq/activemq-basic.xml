@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+	
+	<!-- this example is used from link
+		https://examples.javacodegeeks.com/enterprise-java/apache-camel/apache-camel-activemq-example/
+	 -->
+	
+	<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<!-- <property name="brokerURL" value="vm://localhost?broker.persistent=false" /> -->
+		<property name="brokerURL" value="failover://tcp://localhost:61616" />
+	</bean>
+	<bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+		init-method="start" destroy-method="stop">
+		<property name="maxConnections" value="8" />
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+	</bean>
+
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="pooledConnectionFactory" />
+	</bean>
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="servlet:///activemq" />
+			<transform>
+				<simple>Heartbeat ${date:now:yyyy-MM-dd HH:mm:ss}</simple>
+			</transform>
+			<!-- send the message to queue (name of queue is "in") at broker whose url is "localhost:61616" -->
+			<to uri="activemq:queue:in" />
+		</route>
+	
+		<!-- 
+		<to uri="activemq:queue:queue_name" /> : represents sending message to the queue (queue_name)
+			
+		<from uri="activemq:queue:in" /> : represents fetching/receiving message from the queue (queue_name)	
+		 -->
+
+		<route>
+			<!-- this has subscribed itself as the consumer of the messaage in the queue; whenever there will be any message in the queue , message will be routed to this route -->
+			<from uri="activemq:queue:in" />
+			<log message="Route message from inbox to outbox queue with data ${body}" />
+			<!-- sending the message to queue "out" -->
+			<to uri="activemq:queue:out" />
+		</route>
+		
+		<route>
+			<from uri="activemq:queue:out" />
+			<log message="Print the message from out to console ${body}"/>
+			<to uri="stream:out" />
+		</route>
+		
+		
+
+	</camelContext>
+
+</beans>

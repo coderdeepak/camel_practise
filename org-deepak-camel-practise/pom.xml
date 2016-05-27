@@ -13,7 +13,7 @@
 
 		<camel-version>2.14.1</camel-version>
 
-		<activemq-version>5.10.0</activemq-version>
+		<activemq-version>5.11.1</activemq-version>
 		<aries-blueprint-cm-version>1.0.0</aries-blueprint-cm-version>
 		<aries-util-version>1.1.0</aries-util-version>
 		<atomikos-version>3.9.3</atomikos-version>
