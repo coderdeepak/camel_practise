@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+	
+	<!-- A splitter is a type of router that splits an incoming message into a series of outgoing messages. Each of the outgoing messages contains a piece of the original message. -->
+	
+	
+	
+	<bean id = "listcreater" class = "com.camel.splitter.ListCreator"/>
+	
+	
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="servlet:///splitter" />
+			<!-- getFruits method returns a list of fruits ; i.e message body now contains a list of fruits -->
+			<bean ref = "listcreater" method = "getFruits"/>
+			<split>
+				<!-- instructs camel to split message body ; since body itself is a list ; camel will split body into list components -->
+				<simple>${body}</simple>
+				<to uri = "direct:processFruits"/>
+			</split>
+		</route>
+		
+		<route>
+			<!-- number of times this route will be called is equal to the number of elements(fruits) in the list -->
+			<from uri = "direct:processFruits"/>
+			<!-- ${body} represents individual element of list -->
+			<log message = "splitted body is -----> ${body}"/>
+		</route>
+	</camelContext>
+
+</beans>
