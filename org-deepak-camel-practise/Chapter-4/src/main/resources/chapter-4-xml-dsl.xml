@@ -7,7 +7,8 @@
         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        ">
     
-     <import resource = "splitter\splitter.xml"/>   
+     <import resource = "splitter\splitter.xml"/>
+     <import resource = "aggregator\aggregator.xml"/>   
        
        
        
