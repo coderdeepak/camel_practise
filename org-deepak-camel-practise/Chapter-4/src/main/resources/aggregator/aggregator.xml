@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	<!-- This is an standalone example ; no server required to execute this; 
+		To execute this example run class AggregatorStandaloneClient.java -->
+
+	<!-- The aggregator pattern enables you to combine a batch of related messages into a single message. -->
+		
+	<!-- Correlation expression — Determines which messages should be aggregated together. 
+		The correlation expression is evaluated on each incoming message to produce a correlation key. 
+		Incoming messages with the same correlation key are then grouped into the same batch. 
+		For example, if you want to aggregate all incoming messages into a single message, you can use a constant expression. -->
+		
+	<!-- Completeness condition — Determines when a batch of messages is complete. You can specify this either as a simple size limit or, more generally, 
+		you can specify a predicate condition that flags when the batch is complete.-->
+			
+			
+	
+	<bean id="setAggregationStrategy" class="com.camel.aggregator.SampleAggregatorStretegy" />
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="timer://mytimeobject?period=100" />
+			<!-- This route will be invoked in every 100 ms -->
+			<log message="message fired" />
+			<setBody>
+				<constant>body</constant>
+			</setBody>
+			<setHeader headerName="group">
+				<constant>same</constant>
+			</setHeader>
+			<to uri="direct:aggregrate" />
+		</route>
+
+		<route>
+			<from uri="direct:aggregrate" />
+			<!--  Aggregate all the messages of same group (i.e if value of field group is same ; combine the messages) and send them to route direct:aggregatedMssg.
+				  This route will be called after every 100ms. When aggregation conditions get satisfied (i.e correlationExpression and comletionPredicate) 
+				  message will flow to direct:aggregatedMssg route. In this example as soon as this route receives 2 messages to same group ; aggregated message 
+				  will be routed to direct:aggregatedMssg route.
+				  
+				  AggregationStretegy defines how to aggregate message(concatinate them , add them in any collection etc...this could be any stretgy to combile the messages). 
+				  In this case setAggregationStrategy , concates the messages using delimeter ","  	
+			
+			-->
+			<aggregate strategyRef="setAggregationStrategy"
+				completionSize="5">
+				<correlationExpression>
+					<simple>${headers.group}</simple>
+				</correlationExpression>
+				<completionPredicate>
+					<simple>${header.CamelAggregatedSize} == 2</simple>
+				</completionPredicate>
+				<to uri="direct:aggregatedMssg" />
+			</aggregate>
+			<log message="final message body is -----> ${body}" />
+		</route>
+
+		<route>
+			<from uri="direct:aggregatedMssg" />
+			<log message="message body in  direct:aggregatedMssg is -----> ${body}" />
+		</route>
+	</camelContext>
+
+</beans>
