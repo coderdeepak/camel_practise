@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	<!-- This is an standalone example ; no server required to execute this; 
+		To execute this example run class LoadbalancerStandaloneClient.java -->
+
+	<!-- The load balancer pattern allows you to delegate message processing to one of several endpoints, 
+		using a variety of different load-balancing policies. -->
+
+	<bean id="loadbalancerSupport" class="com.camel.loadbalancer.LoadbalancerSupport" />
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="timer://mytimeobject?period=100" />
+			<!-- This route will be invoked in every 100 ms -->
+			<log message="message fired" />
+			<bean ref = "loadbalancerSupport" method = "getBody"/>
+			<to uri="direct:loadbalancerSupport" />
+		</route>
+
+		<route>
+			<from uri="direct:loadbalancerSupport" />
+			<log message="request received ----------> ${body} " />
+			<!-- Let's say there is a service which is exposed in clustered environment because of heavy processing load; 
+				requirement is to send request to them one by one so that the processing load is divided evenly -->
+				
+			<!-- round robin is the algorith that sends request one by one to all the endpoints for example first request to processRequest1 , 
+				 second to processRequest2 and third to processRequest3 -->	
+			<loadBalance>
+				<roundRobin/>
+				<to uri = "direct:processRequest1"/>
+				<to uri = "direct:processRequest2"/>
+				<to uri = "direct:processRequest3"/>
+			</loadBalance>
+			<log message="request processed ----------> ${body} " />
+			
+		</route>
+
+		<route>
+			<from uri="direct:processRequest1" />
+			<log message="request is being processed in  processRequest1----------> ${body} " />
+		</route>
+		
+		<route>
+			<from uri="direct:processRequest2" />
+			<log message="request is being processed in  processRequest2----------> ${body} " />
+		</route> 
+		
+		<route>
+			<from uri="direct:processRequest3" />
+			<log message="request is being processed in  processRequest3----------> ${body} " />
+		</route>  
+	</camelContext>
+
+</beans>
