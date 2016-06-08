@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	<!-- This is an standalone example ; no server required to execute this; 
+		To execute this example run class ThrottlerStandaloneClient.java -->
+
+	<!-- The Throttler Pattern allows you to ensure that a specific endpoint does not get overloaded, 
+		 or that we don't exceed an agreed SLA with some external service.. 
+		 
+		 A throttler is a processor that limits the flow rate of incoming messages. 
+		 You can use this pattern to protect a target endpoint from getting overloaded. -->
+
+	<bean id="throttlerSupport" class="com.camel.throttler.ThrottlerSupport" />
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="timer://mytimeobject?period=100" />
+			<!-- This route will be invoked in every 100 ms -->
+			<log message="message fired" />
+			<bean ref = "throttlerSupport" method = "getBody"/>
+			<to uri="direct:throttl" />
+		</route>
+
+		<route>
+			<from uri="direct:throttl" />
+			<log message="request received ----------> ${body} " />
+			<!-- In every 30000 ms (3s) this route will accept only 3 messages -->
+			<throttle timePeriodMillis="30000">
+				<constant>3</constant>
+				<!-- <to uri="mock:result" /> -->
+				<to uri = "direct:processRequest"/>
+			</throttle>
+		</route>
+
+		<route>
+			<from uri="direct:processRequest" />
+			<log message="request is being processed ----------> ${body} " />
+		</route> 
+	</camelContext>
+
+</beans>
