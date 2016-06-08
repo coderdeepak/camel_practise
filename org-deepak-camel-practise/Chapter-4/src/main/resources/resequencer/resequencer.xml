@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	<!-- This is an standalone example ; no server required to execute this; 
+		To execute this example run class ResequencerStandaloneClient.java -->
+
+	<!-- The resequencer pattern ensures ordering of messages.
+		 The resequencer pattern enables you to resequence messages(sorting based on certain criteria) according to a sequencing expression.
+		 
+		 A Message Router can route messages from one channel to different channels based on message content or other criteria. 
+		 Because individual messages may follow different routes, some messages are likely to pass through the processing steps sooner than others, 
+		 resulting in the messages getting out of order. However, some subsequent processing steps do require in-sequence processing of messages, 
+		 for example to maintain referential integrity.
+		 
+		 The Resequencer can receive a stream of messages that may not arrive in order. 
+		 The Resequencer contains in internal buffer to store out-of-sequence messages until a complete sequence is obtained. 
+		 The in-sequence messages are then published to the output channel. 
+		 It is important that the output channel is order-preserving so messages are guaranteed to arrive in order at the next component. 
+		 Like most other routers, a Resequencer usually does not modify the message contents.
+	-->
+
+	<!-- Apache Camel supports two resequencing algorithms: 
+		Batch resequencing — Collects messages into a batch, sorts the messages and sends them to their output.
+		Stream resequencing — Re-orders (continuous) message streams based on the detection of gaps between messages.
+	 -->
+
+	<!-- This is the example of Batch resequencing -->
+
+	<bean id="messageIdentifier" class="com.camel.resequencer.MessageIdentifier" />
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="timer://mytimeobject?period=10" />
+			<!-- This route will be invoked in every 100 ms -->
+			<log message="message fired" />
+			<!-- creates a message body with random int value i.e messsage body contains a random int value-->
+			<bean ref="messageIdentifier" method="getMessageBody" />
+			<to uri="direct:resequencer" />
+		</route>
+
+		<route>
+			<from uri="direct:resequencer" />
+			<!-- The Resequencer contains in internal buffer in this example size of buffer is 5. 
+				This EIP sort the message based on body; once buffer size is full; messages are routed to  direct:resequence_result-->
+			<resequence>
+				<batch-config batchSize="5" batchTimeout="4000" />
+				<simple>body</simple>
+				<log message="message received in requencer route -----> ${body}" />
+				<to uri="direct:resequence_result" />
+			</resequence>
+			<log message="final message body is -----> ${body}" />
+		</route>
+
+		<route>
+			<!-- All the messages received by this route will always be sorted on body -->
+			<from uri="direct:resequence_result" />
+			<log message="message body in  resequence_result is -----> ${body}" />
+			
+		</route>
+	</camelContext>
+
+</beans>
