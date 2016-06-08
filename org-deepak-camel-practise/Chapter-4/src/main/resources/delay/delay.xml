@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	<!-- This is an standalone example ; no server required to execute this; 
+		To execute this example run class DelayStandaloneClient.java -->
+
+	<!-- A delayer is a processor that enables you to apply a relative time delay to incoming messages... 
+		 The Delayer Pattern allows you to delay the delivery of messages to some destination...
+		 This is kind of THread.sleep(ms) in java -->
+
+	<bean id="delaySupport" class="com.camel.delay.DelaySupport" />
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="timer://mytimeobject?period=100" />
+			<!-- This route will be invoked in every 100 ms -->
+			<log message="message fired" />
+			<bean ref = "delaySupport" method = "getBody"/>
+			<to uri="direct:delay" />
+		</route>
+
+		<route>
+			<from uri="direct:delay" />
+			<log message="request received ----------> ${body} " />
+			
+			<delay>
+				<constant>1000</constant>
+			</delay>
+			<log message="request processed ----------> ${body} " />
+			
+		</route>
+
+		<route>
+			<from uri="direct:processRequest" />
+			<log message="request is being processed ----------> ${body} " />
+		</route> 
+	</camelContext>
+
+</beans>
