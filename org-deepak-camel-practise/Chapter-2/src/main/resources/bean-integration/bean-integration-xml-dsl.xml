@@ -28,7 +28,7 @@
 				<simple>This is current body</simple>
 			</setBody>
 			<bean ref="myBeanId" method="processExchangeBody(${body})"/>
-			<log message = "body in exchange is ${in.body}"/>
+			<log message = "body in exchange is ${body}"/>
 		</route>
 		
 		<!-- A simple bean integration where exchange body is mapped to java bean parameter -->
@@ -41,7 +41,7 @@
 				<simple>Deepak</simple>
 			</setHeader>
 			<bean ref="myBeanId" method="processExchangeUsingAnnotations"/>
-			<log message = "body in exchange is ${in.body}"/>
+			<log message = "body in exchange is ${body}"/>
 		</route>
 
 		

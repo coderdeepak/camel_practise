@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       ">
+
+	<!-- This is an standalone example ; no server required to execute this; 
+		To execute this example run class ComposedMessageProcessorStandaloneClient.java -->
+
+	<!-- The aggregator pattern enables you to combine a batch of related messages 
+		into a single message. -->
+
+	<!-- Correlation expression — Determines which messages should be aggregated 
+		together. The correlation expression is evaluated on each incoming message 
+		to produce a correlation key. Incoming messages with the same correlation 
+		key are then grouped into the same batch. For example, if you want to aggregate 
+		all incoming messages into a single message, you can use a constant expression. -->
+
+	<!-- Completeness condition — Determines when a batch of messages is complete. 
+		You can specify this either as a simple size limit or, more generally, you 
+		can specify a predicate condition that flags when the batch is complete. -->
+
+
+
+	<bean id="setAggregationStrategy"
+		class="com.camel.aggregator.ComposedMessageProcessorAggregatorStretegy" />
+	<bean id="support"
+		class="com.camel.delay.ComposedMessageProcessorAggregatorStretegySupport" />
+
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+		<route>
+			<from uri="timer://mytimeobject?period=100" />
+			<bean ref="delaySupport" method="getBody" />
+			<split strategyRef="setAggregationStrategy">
+				<simple>${body}</simple>
+				<to uri = "direct:process-each-message"/>
+			</split>
+			<log message = "result consolidated body---> ${body}"/>
+		</route>
+
+		<route>
+			<from uri="direct:process-each-message" />
+			<transform>
+				<simple>Processed: ${body}</simple>
+			</transform>
+		</route>
+	</camelContext>
+
+</beans>
